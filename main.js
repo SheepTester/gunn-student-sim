@@ -20,7 +20,8 @@ const gameState = {
   continueResolve: null,
   self: false,
   selfLength: 1,
-  scolded: false
+  scolded: false,
+  totalSAT: 0
 };
 
 function updateHomework() {
@@ -28,7 +29,8 @@ function updateHomework() {
   if (renderer.tests) {
     renderer.tests.textContent = gameState.tests;
     renderer.testReadiness.textContent = Math.round(gameState.testReadiness * 100) / 100;
-    enableBtn(renderer.studyBtn);
+    if (gameState.tests) enableBtn(renderer.studyBtn);
+    else disableBtn(renderer.studyBtn, 'You don\'t have a test tomorrow!');
   }
   if (gameState.homeworks === 0) {
     disableBtn(renderer.doHWBtn, 'No more homework!');
@@ -54,14 +56,19 @@ function addHours(hours) {
   renderer.day.textContent = dayNames[gameState.day];
 }
 
+function calculateScore(win) {
+  const score = gameState.grade + gameState.friends * 20 + gameState.studySAT * 2 + gameState.accumulativeDay * 50;
+  return Math.round(score);
+}
+
 function schoolContinue() {
   return new Promise(res => gameState.continueResolve = res);
 }
-async function assembly(lines) {
+async function assembly(lines, customHeading = 'ASSEMBLY') {
   let skip = false, skipBtn;
   renderer.schoolContent.appendChild(createFragment([
     '\n',
-    span('assembly-heading', 'ASSEMBLY'),
+    span(customHeading.toLowerCase() + '-heading', customHeading),
     ' ',
     skipBtn = span('button', '[skip]', () => {
       skip = true;
@@ -92,7 +99,7 @@ async function beginSchool() {
       ' ',
       span('grade-heading', 'GRADE'),
       ' ',
-      renderer.grade = span('grade', '100'),
+      renderer.grade = span('grade', '100', null, 'Must be at least 90%'),
       '%'
     ]), renderer.gradeMarker);
     document.body.appendChild(createFragment([
@@ -170,7 +177,7 @@ async function beginSchool() {
       ' ',
       span('friend-heading', 'FRIENDS'),
       ' ',
-      renderer.friends = span('friends', '3')
+      renderer.friends = span('friends', '3', null, 'You need a minimum of 3 friends.')
     ]), renderer.gradeMarker);
   } else if (gameState.accumulativeDay === 3) {
     await assembly([
@@ -248,16 +255,17 @@ async function beginSchool() {
       ]));
       if (makeFriend) {
         gameState.friends++;
-        renderer.friends = gameState.friends;
+        renderer.friends.textContent = gameState.friends;
       }
       await schoolContinue();
     } else {
       gameState.friends--;
-      renderer.friends = gameState.friends;
+      renderer.friends.textContent = gameState.friends;
       renderer.schoolContent.appendChild(createFragment([
         span('', 'One of your friends left you because you seemed to have stopped hanging out with them.'),
         '\n'
       ]));
+      await schoolContinue();
     }
   }
   if (gameState.grade < 90) {
@@ -273,7 +281,9 @@ async function beginSchool() {
         '\n\n',
         span('end-msg', 'You have been disowned.'),
         '\n\n',
-        span('the-end', 'GAME OVER')
+        span('the-end', 'GAME OVER'),
+        '\n\n',
+        span('', 'Score: ' + calculateScore(false))
       ]));
       renderer.schoolContBtn.classList.add('hidden');
       renderer.studySATBtn.dataset.title = 'Find a family first!';
@@ -302,11 +312,32 @@ async function beginSchool() {
 const clicks = {
   studySAT() {
     gameState.studySAT++;
-    switch (gameState.studySAT) {
+    gameState.totalSAT++;
+    if (gameState.studySAT >= 50) {
+      document.body.innerHTML = '';
+      document.body.appendChild(createFragment([
+        renderer.schoolContent = span(),
+        renderer.schoolContBtn = span('button', '[ok]', clicks.schoolContinue)
+      ]));
+      assembly([
+        '--: Your parents are proud of you. You have completed all the SAT/ACT preparation books, and now you can take the SAT/ACT.',
+        '--: You do pretty well (average for a Gunn student).',
+        '--: You can now leave Gunn behind.'
+      ], 'GRADUATION').then(() => {
+        document.body.removeChild(renderer.schoolContBtn);
+        document.body.appendChild(createFragment([
+          span('the-end', 'YOU WIN!'),
+          '\n\n',
+          span('', 'Score: ' + calculateScore(true))
+        ]));
+      });
+      return;
+    }
+    switch (gameState.totalSAT) {
       case 1:
         document.body.appendChild(createFragment([
           ' You are now ',
-          renderer.satPercent = span('sat-percentage', '2'),
+          renderer.satPercent = span('sat-percentage', '2', null, 'If you\'re 100% ready, you can graduate high school early!'),
           '% ready for the SAT/ACT.'
         ]));
         break;
