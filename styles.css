@@ -1,0 +1,79 @@
+body {
+  margin: 50px;
+  font-size: 0;
+  font-family: 'Inconsolata', monospace;
+  background-color: #434b50;
+  color: rgba(255, 255, 255, 0.7);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 16px;
+}
+.divider {
+  color: rgba(255, 255, 255, 0.3);
+}
+.button {
+  cursor: pointer;
+  text-decoration: underline;
+  color: #ba847a;
+  font-weight: bold;
+  user-select: none;
+}
+.button:focus {
+  outline: none;
+}
+.disabled {
+  cursor: auto;
+  opacity: 0.5;
+}
+.hidden {
+  display: none;
+}
+.hover-text {
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background-color: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.8);
+  padding: 2px 5px;
+  position: fixed;
+  margin-left: 5px;
+}
+
+.time-heading {
+  color: #8bb7cf;
+  font-weight: bold;
+}
+.grade-heading {
+  color: #8aa5cf;
+  font-weight: bold;
+}
+.friend-heading {
+  color: #8a97cf;
+  font-weight: bold;
+}
+.school-heading {
+  color: #8ac4cf;
+  font-weight: bold;
+}
+.assembly-heading {
+  color: #8acfba;
+  font-weight: bold;
+}
+.parents-heading {
+  color: #e9acac;
+  font-weight: bold;
+}
+.assembly-line-cc {
+  color: #b6af84;
+}
+.assembly-line-tf {
+  color: #b58282;
+}
+.friend-request {
+  color: #7dc373;
+}
+.end-msg {
+  color: #b56a6a;
+}
+.the-end {
+  color: #d03c3c;
+  font-weight: bold;
+}
