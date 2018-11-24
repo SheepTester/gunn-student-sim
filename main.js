@@ -1,6 +1,6 @@
 // URL PARAMETERS
 // jennifer-li - activate Jennifer Li mode
-// bedtime - bedtime at 12 AM because you need 8 hours of sleep
+// bedtime     - bedtime at 12 AM because you need 8 hours of sleep
 
 const params = {};
 if (window.location.search) {
@@ -64,12 +64,20 @@ function updateHomework() {
     disableBtn(renderer.studyBtn, 'You cannot concentrate because your parents are scolding you.');
   }
 }
-function addHours(hours) {
+function addHours(hours, atHome) {
   const days = Math.floor((gameState.time + hours) / 24);
   gameState.time = (gameState.time + hours) % 24;
   gameState.day = (gameState.day + days) % 5;
   renderer.time.textContent = humanTime(gameState.time);
   renderer.day.textContent = dayNames[gameState.day];
+  if (atHome) {
+    if (gameState.time >= 8 && gameState.time < 16) {
+      beginSchool();
+      gameState.sleeplessNights++;
+    } else if (params['bedtime'] && gameState.time > 0 && gameState.time < 8) {
+      clicks.sleep();
+    }
+  }
 }
 
 function calculateScore(win) {
@@ -366,7 +374,6 @@ async function beginSchool() {
   if (params['jennifer-li']) {
     const hours = Math.floor(Math.random() * 6 + 1);
     renderer.schoolContent.appendChild(createFragment([
-      '\n',
       span('jennifer-li', `You spend ${hours} hour(s) watching dog videos on Instagram. You regret doing so.`),
       '\n'
     ]));
@@ -433,20 +440,12 @@ const clicks = {
         break;
     }
     renderer.satPercent.textContent = 100 * gameState.studySAT / config.MAX_SAT_STUDY;
-    addHours(1);
-    if (gameState.time === 8) {
-      beginSchool();
-      gameState.sleeplessNights++;
-    }
+    addHours(1, true);
   },
   doHW() {
     gameState.homeworks--;
     updateHomework();
-    addHours(1);
-    if (gameState.time === 8) {
-      beginSchool();
-      gameState.sleeplessNights++;
-    }
+    addHours(1, true);
   },
   sleep() {
     if (gameState.time < 8) addHours(8 - gameState.time);
@@ -467,11 +466,7 @@ const clicks = {
       renderer.satPercent.textContent = 100 * gameState.studySAT / config.MAX_SAT_STUDY;
     }
     updateHomework();
-    addHours(1);
-    if (gameState.time === 8) {
-      beginSchool();
-      gameState.sleeplessNights++;
-    }
+    addHours(1, true);
   },
   reload() {
     window.location.reload();
