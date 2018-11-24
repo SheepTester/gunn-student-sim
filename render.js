@@ -22,6 +22,18 @@ function init() {
   document.body.textContent = '';
   document.body.appendChild(createFragment([
     hoverText,
+    span('floating', [
+      renderer.dialog = span('dialog hidden', [
+        renderer.dialogHeading = span('dialog-heading', ''),
+        renderer.closeBtn = span('button close-button disabled', '[close]', clicks.closeDialog),
+        '\n',
+        renderer.dialogContent = span()
+      ]),
+      '\n',
+      span('button info-button', '[info]', openDialog(clicks.showInfo)),
+      ' ',
+      span('button info-button', '[source]', 'https://github.com/SheepTester/gunn-student-sim/')
+    ]),
     renderer.timeWrapper = span('hidden', [
       span('time-heading', 'TIME'),
       ' ',
@@ -41,7 +53,7 @@ function createFragment(elems) {
   return frag;
 }
 function span(classes = '', content = '', onclick = null, hoverText = '') {
-  const span = document.createElement('span');
+  const span = document.createElement(typeof onclick === 'string' ? 'a' : 'span');
   if (Array.isArray(content)) {
     span.appendChild(createFragment(content));
   } else {
@@ -49,7 +61,9 @@ function span(classes = '', content = '', onclick = null, hoverText = '') {
   }
   span.className = classes;
   if (hoverText) span.dataset.title = hoverText;
-  if (onclick) {
+  if (typeof onclick === 'string') {
+    span.href = onclick;
+  } else if (onclick) {
     span.addEventListener('click', e => {
       if (!span.classList.contains('disabled')) {
         onclick();
@@ -68,4 +82,11 @@ function enableBtn(btn) {
   btn.classList.remove('disabled');
   btn.tabIndex = 0;
   btn.dataset.title = '';
+}
+function openDialog(listener) {
+  return () => {
+    renderer.closeBtn.classList.remove('disabled');
+    renderer.dialog.classList.remove('hidden');
+    listener();
+  };
 }

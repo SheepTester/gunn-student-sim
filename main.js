@@ -16,12 +16,13 @@ const gameState = {
   testReadiness: 0,
   testsTaken: 1,
   friendExpectation: 3,
-  missedSELF: false,
   continueResolve: null,
   self: false,
   selfLength: 1,
   scolded: false,
-  totalSAT: 0
+  totalSAT: 0,
+  absences: 0,
+  warned: false
 };
 
 function updateHomework() {
@@ -126,9 +127,9 @@ async function beginSchool() {
     }
     renderer.grade.textContent = Math.round(gameState.grade * 100) / 100;
     await schoolContinue();
-  } else if (gameState.missedSELF) {
+  } else if (gameState.absences === 3 && !gameState.warned) {
     renderer.schoolContent.appendChild(createFragment([
-      span('', 'The school pulled you out of class to interrogate you about your absence during SELF' + (gameState.tests ? ', and you missed your test.' : '.')),
+      span('', 'The school pulled you out of class to warn you about your absence during SELF and how you can work on improving your attendance. They make it clear that five unexcused absences will lead to suspension.' + (gameState.tests ? ' You end up missing your test(s) from the talks.' : '.')),
       '\n'
     ]));
     for (let i = 0; i < gameState.tests; i++) {
@@ -136,8 +137,27 @@ async function beginSchool() {
       gameState.testsTaken++;
     }
     renderer.grade.textContent = Math.round(gameState.grade * 100) / 100;
-    gameState.missedSELF = false;
+    gameState.warned = true;
     await schoolContinue();
+  } else if (gameState.absences >= 5) {
+    renderer.schoolContent.appendChild(createFragment([
+      '\n',
+      span('', 'You now have five unexcused absences. The school must follow the district policy.'),
+      '\n\n',
+      span('end-msg', 'You have been suspended.'),
+      '\n\n',
+      span('the-end', 'GAME OVER'),
+      '\n\n',
+      span('', 'Score: ' + calculateScore(false)),
+      '\n\n',
+      span('button', '[try again]', clicks.reload)
+    ]));
+    renderer.schoolContBtn.classList.add('hidden');
+    renderer.studySATBtn.dataset.title = 'You aren\'t in school anymore!';
+    renderer.doHWBtn.dataset.title = 'You aren\'t in school anymore!';
+    renderer.studyBtn.dataset.title = 'You aren\'t in school anymore!';
+    renderer.sleepBtn.dataset.title = 'You aren\'t in school anymore!';
+    return;
   } else {
     for (let i = 0; i < gameState.tests; i++) {
       const threshold = Math.random() * 50 + 25;
@@ -159,19 +179,19 @@ async function beginSchool() {
       renderer.studyBtn = span('button disabled', '[study for tests]', clicks.studyTest, 'You\'re at school!'),
       ' You are ',
       renderer.testReadiness = span('test-readiness', '0'),
-      '% ready for the test(s) tomorrow, and you have ',
+      '% ready for ',
       renderer.tests = span('upcoming-tests', '0'),
       ' test(s) tomorrow.'
     ]), renderer.testStudyMarker);
   } else if (gameState.accumulativeDay === 2) {
     await assembly([
-      '--: Carlomagno and Firenzi wave to the audience.',
-      'cc: Carlomagno: Good morning! We are hard at work on a new fun extension to SELF for you guys to help you reduce stress.',
-      'tf: Firenzi: We plan to introduce this program tomorrow, so stay tuned!',
-      'cc: Carlomagno: However, today we will give you a brief preview of what is to come!',
-      'tf: Firenzi: Friendships are extremely important, even more important that your schoolwork.',
-      'cc: Carlomagno: That is why today, we are giving you guys a challenge: maintain at least THREE friendships! Most of you already have three friends, so this should not be hard.',
-      'tf: Firenzi: Do note that friendships require MAINTENANCE. However, we will be concerned if you do not satisfy this minimum.'
+      '--: Curlymango and Frenzy wave to the audience.',
+      'cc: Curlymango: Good morning! We are hard at work on a new fun extension to SELF for you guys to help you reduce stress.',
+      'tf: Frenzy: We plan to introduce this program tomorrow, so stay tuned!',
+      'cc: Curlymango: However, today we will give you a brief preview of what is to come!',
+      'tf: Frenzy: Friendships are extremely important, even more important that your schoolwork.',
+      'cc: Curlymango: That is why today, we are giving you guys a challenge: maintain at least THREE friendships! Most of you already have three friends, so this should not be hard.',
+      'tf: Frenzy: Do note that friendships require MAINTENANCE. However, we will be concerned if you do not satisfy this minimum.'
     ]);
     document.body.insertBefore(createFragment([
       ' ',
@@ -181,14 +201,29 @@ async function beginSchool() {
     ]), renderer.gradeMarker);
   } else if (gameState.accumulativeDay === 3) {
     await assembly([
-      '--: Carlomagno and Firenzi wave to the audience.',
-      'cc: Carlomagno: Good morning! Yesterday, we hinted at our destressing program that we have been working on for the last few months.',
-      'tf: Firenzi: Today is the day! We are proud to announce to you... afterschool SELF!',
+      '--: Curlymango and Frenzy wave to the audience.',
+      'cc: Curlymango: Good morning! Yesterday, we hinted at our destressing program that we have been working on for the last few months.',
+      'tf: Frenzy: Today is the day! We are proud to announce to you... afterschool SELF!',
       '--: The students do not react positively to this.',
-      'cc: Carlomagno: Come on! You will enjoy this program for sure! This program is currently mandatory for sophomores only, but other grades are free to join in as well!',
-      'tf: Firenzi: This SELF session is only an hour long, and then you are free to leave!'
+      'cc: Curlymango: Come on! You will enjoy this program for sure! This program is currently mandatory for sophomores only, but other grades are free to join in as well!',
+      'tf: Frenzy: This SELF session is only an hour long, and then you are free to leave!'
     ]);
     gameState.self = true;
+  } else if (gameState.day === 4) {
+    gameState.selfLength++;
+    if (Math.random() < 0.5) {
+      await assembly([
+        '--: Curlymango and Frenzy wave to the audience.',
+        `cc: Curlymango: Good morning! Since we\'ve noticed how much you guys loved the afterschool SELF program, we\'re now making it ${gameState.selfLength} hours long!`
+      ]);
+    } else {
+      gameState.friendExpectation++;
+      await assembly([
+        '--: Curlymango and Frenzy wave to the audience.',
+        `tf: Frenzy: Good morning! With your newfound skills in relationship maintenance and friendship building, we\'re now raising our expectations! We now expect each of you to have at least ${gameState.friendExpectation} friends.`
+      ]);
+      renderer.friends.dataset.title = `You need a minimum of ${gameState.friendExpectation} friends.`;
+    }
   }
   gameState.hwRate += 0.7;
   gameState.homeworks += Math.floor(gameState.hwRate);
@@ -221,10 +256,19 @@ async function beginSchool() {
     if (answer) {
       addHours(gameState.selfLength);
     } else {
-      gameState.missedSELF = true;
+      if (gameState.absences === 0) {
+        document.body.insertBefore(createFragment([
+          ' ',
+          span('absences-heading', 'ABSENCES', null, 'SELF teaches the most important and practical skills you need for life, so don\'t dare you miss it!'),
+          ' ',
+          renderer.absences = span('absences', '0', null, 'Warning at 3 absences, suspension at 5.')
+        ]), renderer.gradeMarker);
+      }
+      gameState.absences++;
+      renderer.absences.textContent = gameState.absences;
     }
   }
-  if (gameState.friends < gameState.friendExpectation) {
+  if (gameState.friends < gameState.friendExpectation && Math.random() < 0.5) {
     renderer.schoolContent.appendChild(createFragment([
       span('', 'The school is worried about your social life and is requiring you stay for another hour to learn more about forming and maintaining friendships.'),
       '\n\n'
@@ -283,7 +327,9 @@ async function beginSchool() {
         '\n\n',
         span('the-end', 'GAME OVER'),
         '\n\n',
-        span('', 'Score: ' + calculateScore(false))
+        span('', 'Score: ' + calculateScore(false)),
+        '\n\n',
+        span('button', '[try again]', clicks.reload)
       ]));
       renderer.schoolContBtn.classList.add('hidden');
       renderer.studySATBtn.dataset.title = 'Find a family first!';
@@ -328,7 +374,9 @@ const clicks = {
         document.body.appendChild(createFragment([
           span('the-end', 'YOU WIN!'),
           '\n\n',
-          span('', 'Score: ' + calculateScore(true))
+          span('', 'Score: ' + calculateScore(true)),
+          '\n\n',
+          span('button', '[play again]', clicks.reload)
         ]));
       });
       return;
@@ -399,5 +447,20 @@ const clicks = {
       beginSchool();
       gameState.sleeplessNights++;
     }
+  },
+  reload() {
+    window.location.reload();
+  },
+  closeDialog() {
+    renderer.closeBtn.classList.add('disabled');
+    renderer.dialog.classList.add('hidden');
+    renderer.dialogContent.innerHTML = '';
+  },
+  showInfo() {
+    renderer.dialogHeading.textContent = 'INFO';
+    renderer.dialogContent.appendChild(createFragment([
+      'This game accurately portrays the life of a Gunn student. Students at Gunn must balance their social lives, academics, careers, and commitment to SELF, but to balance one would unbalance another.\n\n',
+      'To win, you need to be able to take the SAT/ACT early so that you can graduate early. However, you can only do that in your free time since homework and test studying takes priority.\n\n'
+    ]))
   }
 };
