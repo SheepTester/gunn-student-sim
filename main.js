@@ -39,7 +39,9 @@ const gameState = {
   totalSAT: 0,
   absences: 0,
   warned: false,
-  retakeTests: 0
+  retakeTests: 0,
+  avgSleepLength: null,
+  reported: false
 };
 
 function updateHomework() {
@@ -73,6 +75,11 @@ function addHours(hours, atHome) {
   if (atHome) {
     if (Math.floor((gameState.time - 8) / 24) > gameState.accumulativeDay) {
       gameState.sleeplessNights++;
+      if (gameState.accumulativeDay === 0) {
+        gameState.avgSleepLength = 0;
+      } else {
+        gameState.avgSleepLength = gameState.avgSleepLength * gameState.accumulativeDay / (gameState.accumulativeDay + 1);
+      }
       beginSchool();
     } else if (params['bedtime'] && Math.floor(gameState.time / 24) > gameState.accumulativeDay) {
       clicks.sleep();
@@ -153,7 +160,7 @@ async function beginSchool() {
     await schoolContinue();
   } else if (gameState.absences === 3 && !gameState.warned) {
     renderer.schoolContent.appendChild(createFragment([
-      span('', 'The school pulled you out of class to warn you about your absence during SELF and how you can work on improving your attendance. They make it clear that five unexcused absences will lead to suspension.' + (gameState.tests ? ' You end up missing your test(s) from the talks and you\'ll have to take them tomorrow.' : '.')),
+      span('', 'The school pulled you out of class to warn you about your absence during SELF and how you can work on improving your attendance. They make it clear that five unexcused absences will lead to suspension.' + (gameState.tests ? ' You end up missing your test(s) from the talks and you\'ll have to take them tomorrow.' : '')),
       '\n'
     ]));
     testsToRetake = gameState.tests;
@@ -178,6 +185,21 @@ async function beginSchool() {
     renderer.studyBtn.dataset.title = 'You aren\'t in school anymore!';
     renderer.sleepBtn.dataset.title = 'You aren\'t in school anymore!';
     return;
+  } else if (!gameState.reported && gameState.avgSleepLength < 3 && Math.random() < 0.2) {
+    renderer.schoolContent.appendChild(createFragment([
+      span('', 'The school pulled you out of class to interrogate you because apparently one student reported you simply for looking depressed; perhaps you should\'ve slept more. The school says that they will periodically pull you out of class to check on you in the future.' + (gameState.tests ? ' You end up missing your test(s) from the talks and you\'ll have to take them tomorrow.' : '')),
+      '\n'
+    ]));
+    testsToRetake = gameState.tests;
+    gameState.reported = true;
+    await schoolContinue();
+  } else if (gameState.reported && Math.random() < 0.2) {
+    renderer.schoolContent.appendChild(createFragment([
+      span('', 'The school pulled you out of class to check in with your "depression."' + (gameState.tests ? ' You end up missing your test(s) from the talks and you\'ll have to take them tomorrow.' : '')),
+      '\n'
+    ]));
+    testsToRetake = gameState.tests;
+    await schoolContinue();
   } else {
     for (let i = 0; i < gameState.tests - gameState.retakeTests; i++) {
       const threshold = Math.random() * 50 + 25;
@@ -224,7 +246,7 @@ async function beginSchool() {
     await assembly([
       '--: Curlymango and Frenzy wave to the audience.',
       'cc: Curlymango: Good morning! Yesterday, we hinted at our destressing program that we have been working on for the last few months.',
-      'tf: Frenzy: Today is the day! We are proud to announce to you... afterschool SELF!',
+      'tf: Frenzy: Today is the day! We are proud to announce to you... after-school SELF!',
       '--: The students do not react positively to this.',
       'cc: Curlymango: Come on! You will enjoy this program for sure! This program is currently mandatory for sophomores only, but other grades are free to join in as well!',
       'tf: Frenzy: This SELF session is only an hour long, and then you are free to leave!'
@@ -235,7 +257,7 @@ async function beginSchool() {
     if (Math.random() < 0.5) {
       await assembly([
         '--: Curlymango and Frenzy wave to the audience.',
-        `cc: Curlymango: Good morning! Since we\'ve noticed how much you guys loved the afterschool SELF program, we\'re now making it ${gameState.selfLength} hours long!`
+        `cc: Curlymango: Good morning! Since we\'ve noticed how much you guys loved the after-school SELF program, we\'re now making it ${gameState.selfLength} hours long!`
       ]);
     } else {
       gameState.friendExpectation++;
@@ -265,7 +287,7 @@ async function beginSchool() {
     let resolve, promise = new Promise(res => resolve = res), opt1, opt2;
     renderer.schoolContBtn.classList.add('disabled');
     renderer.schoolContent.appendChild(createFragment([
-      span('', `Go to afterschool SELF?`),
+      span('', `Go to after-school SELF?`),
       '\n',
       opt1 = span('button', '[ok]', () => resolve(true)),
       ' ',
@@ -496,9 +518,14 @@ const clicks = {
     addHours(1, true);
   },
   sleep() {
-    const nextSchool = Math.ceil((gameState.time - 8) / 24) * 24 + 8;
-    addHours(nextSchool - gameState.time);
+    const sleepLength = Math.ceil((gameState.time - 8) / 24) * 24 + 8 - gameState.time;
+    addHours(sleepLength);
     gameState.sleeplessNights = 0;
+    if (gameState.accumulativeDay === 0) {
+      gameState.avgSleepLength = sleepLength;
+    } else {
+      gameState.avgSleepLength = (gameState.avgSleepLength * gameState.accumulativeDay + sleepLength) / (gameState.accumulativeDay + 1);
+    }
     beginSchool();
   },
   schoolContinue() {
@@ -547,6 +574,7 @@ const clicks = {
   showUpdates() {
     renderer.dialogHeading.textContent = 'UPDATES';
     renderer.dialogContent.appendChild(createFragment([
+      'Update 3: There\'s now a chance that a student will report you to the Administration for looking "depressed" if you don\'t sleep enough.\n\n',
       'Update 2: Number of days survived is shown with score, game is better at dealing with 15 friends\n\n',
       'Update 1: initial release'
     ]))
