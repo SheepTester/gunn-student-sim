@@ -66,16 +66,15 @@ function updateHomework() {
   }
 }
 function addHours(hours, atHome) {
-  const days = Math.floor((gameState.time + hours) / 24);
-  gameState.time = (gameState.time + hours) % 24;
-  gameState.day = (gameState.day + days) % 5;
-  renderer.time.textContent = humanTime(gameState.time);
+  gameState.time += hours;
+  gameState.day = Math.floor(gameState.time / 24) % 5;
+  renderer.time.textContent = humanTime(gameState.time % 24);
   renderer.day.textContent = dayNames[gameState.day];
   if (atHome) {
-    if (gameState.time >= 8 && gameState.time < 16) {
-      beginSchool();
+    if (Math.floor((gameState.time - 8) / 24) > gameState.accumulativeDay) {
       gameState.sleeplessNights++;
-    } else if (params['bedtime'] && gameState.time > 0 && gameState.time < 8) {
+      beginSchool();
+    } else if (params['bedtime'] && Math.floor(gameState.time / 24) > gameState.accumulativeDay) {
       clicks.sleep();
     }
   }
@@ -83,7 +82,7 @@ function addHours(hours, atHome) {
 
 function calculateScore(win) {
   const score = gameState.grade + gameState.friends * 20 + gameState.studySAT * 2 + gameState.accumulativeDay * 50;
-  return Math.round(score);
+  return `${Math.round(score)}; survived ${gameState.accumulativeDay} day(s)`;
 }
 
 function schoolContinue() {
@@ -261,6 +260,7 @@ async function beginSchool() {
   ]));
   await schoolContinue();
   addHours(8);
+  let hoursLeft = Math.ceil((gameState.time - 8) / 24) * 24 + 8 - gameState.time;
   if (gameState.self) {
     let resolve, promise = new Promise(res => resolve = res), opt1, opt2;
     renderer.schoolContBtn.classList.add('disabled');
@@ -277,6 +277,7 @@ async function beginSchool() {
     opt1.classList.add('disabled');
     opt2.classList.add('disabled');
     if (answer) {
+      hoursLeft -= gameState.selfLength;
       addHours(gameState.selfLength);
     } else {
       if (gameState.absences === 0) {
@@ -297,13 +298,21 @@ async function beginSchool() {
       '\n\n'
     ]));
     addHours(1);
+    hoursLeft--;
   }
   if (gameState.retakeTests) {
+    if (gameState.retakeTests > hoursLeft) { // not enough time for retakes :O
+      testsToRetake += gameState.retakeTests - hoursLeft;
+      gameState.tests += gameState.retakeTests - hoursLeft;
+      renderer.tests.textContent = gameState.tests;
+      gameState.retakeTests = hoursLeft;
+    }
     renderer.schoolContent.appendChild(createFragment([
       span('', `You spend ${gameState.retakeTests} hour(s) after school to retake tests.`),
       '\n'
     ]));
     addHours(gameState.retakeTests);
+    hoursLeft -= gameState.retakeTests;
     for (let i = 0; i < gameState.retakeTests; i++) {
       const threshold = Math.random() * 50 + 25;
       const score = Math.min(100, tempReadiness + 100 - threshold);
@@ -334,6 +343,15 @@ async function beginSchool() {
     opt1.classList.add('disabled');
     opt2.classList.add('disabled');
     if (answer) {
+      if (gameState.friends > hoursLeft) {
+        const lostFriends = gameState.friends - hoursLeft;
+        gameState.friends = hoursLeft;
+        renderer.friends.textContent = gameState.friends;
+        renderer.schoolContent.appendChild(createFragment([
+          span('', `${lostFriends} friend(s) leave you because you don't have enough time for them.`),
+          '\n'
+        ]));
+      }
       addHours(gameState.friends);
       const makeFriend = gameState.friends < gameState.friendExpectation || Math.random() < gameState.friends / 10;
       renderer.schoolContent.appendChild(createFragment([
@@ -380,7 +398,7 @@ async function beginSchool() {
       renderer.studyBtn.dataset.title = 'Find a family first!';
       renderer.sleepBtn.dataset.title = 'Find a family first!';
       return;
-    } else {
+    } else if (hoursLeft >= 3) {
       renderer.schoolContent.appendChild(createFragment([
         '\n',
         span('', 'Your parents enter your room, visibly disappointed and angry. They scold you for the entire night, and you are unable to study. They make it clear that there will be worse consequences if your grades continue to drop.'),
@@ -388,16 +406,25 @@ async function beginSchool() {
       ]));
       gameState.scolded = true;
       addHours(3);
+      hoursLeft -= 3;
       await schoolContinue();
     }
   }
-  if (params['jennifer-li']) {
-    const hours = Math.floor(Math.random() * 6 + 1);
+  if (params['jennifer-li'] && hoursLeft > 0) {
+    const hours = Math.min(Math.floor(Math.random() * 6 + 1), hoursLeft);
     renderer.schoolContent.appendChild(createFragment([
       span('jennifer-li', `You spend ${hours} hour(s) watching dog videos on Instagram. You regret doing so.`),
       '\n'
     ]));
     addHours(hours);
+    hoursLeft -= hours;
+    await schoolContinue();
+  }
+  if (hoursLeft <= 0) {
+    renderer.schoolContent.appendChild(createFragment([
+      span('', 'Alas, you have spent the rest of the day and night outside, and you must attend school again.'),
+      '\n'
+    ]));
     await schoolContinue();
   }
   updateHomework();
@@ -405,6 +432,7 @@ async function beginSchool() {
   renderer.school.classList.add('hidden');
   disableBtn(renderer.schoolContBtn);
   renderer.schoolContent.innerHTML = '';
+  if (hoursLeft <= 0) addHours(0, true);
 }
 
 const clicks = {
@@ -468,8 +496,8 @@ const clicks = {
     addHours(1, true);
   },
   sleep() {
-    if (gameState.time < 8) addHours(8 - gameState.time);
-    else addHours(24 - gameState.time + 8);
+    const nextSchool = Math.ceil((gameState.time - 8) / 24) * 24 + 8;
+    addHours(nextSchool - gameState.time);
     gameState.sleeplessNights = 0;
     beginSchool();
   },
@@ -508,6 +536,8 @@ const clicks = {
     renderer.dialogHeading.textContent = 'GAME MODES';
     renderer.dialogContent.appendChild(createFragment([
       'There are a few game modes that make small changes to the game mechanics that make the game even harder. These were suggested by experienced Gunn students.\n',
+      span('button', '[default mode]', './'),
+      ' - Play the game as the creator intended it to be played.\n',
       span('button', '[jennifer li mode]', './?jennifer-li'),
       ' - Experience firsthand the detrimental effects of technological distractions by losing 1-6 hours every day to dog videos on Instagram, like fellow Gunn student Jennifer Li.\n',
       span('button', '[bedtime mode]', './?bedtime'),
@@ -517,6 +547,7 @@ const clicks = {
   showUpdates() {
     renderer.dialogHeading.textContent = 'UPDATES';
     renderer.dialogContent.appendChild(createFragment([
+      'Update 2: Number of days survived is shown with score, game is better at dealing with 15 friends\n\n',
       'Update 1: initial release'
     ]))
   }
