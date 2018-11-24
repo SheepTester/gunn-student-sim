@@ -499,7 +499,24 @@ const clicks = {
     renderer.dialogHeading.textContent = 'INFO';
     renderer.dialogContent.appendChild(createFragment([
       'This game accurately portrays the life of a Gunn student. Students at Gunn must balance their social lives, academics, careers, and commitment to SELF, but to balance one would unbalance another.\n\n',
-      'To win, you need to be able to take the SAT/ACT early so that you can graduate early. However, you can only do that in your free time since homework and test studying takes priority.\n\n'
+      'To win, you need to be able to take the SAT/ACT early so that you can graduate early. However, you can only do that in your free time since homework and test studying takes priority.\n\n',
+      span('button', '[more info]', './info.html')
+    ]))
+  },
+  showModes() {
+    renderer.dialogHeading.textContent = 'GAME MODES';
+    renderer.dialogContent.appendChild(createFragment([
+      'There are a few game modes that make small changes to the game mechanics that make the game even harder. These were suggested by experienced Gunn students.\n',
+      span('button', '[jennifer li mode]', './?jennifer-li'),
+      ' - Experience firsthand the detrimental effects of technological distractions by losing 1-6 hours every day to dog videos on Instagram, like fellow Gunn student Jennifer Li.\n',
+      span('button', '[bedtime mode]', './?bedtime'),
+      ' - It is recommended to sleep at least eight hours a night; your parents care about your mental health, so they force you to sleep at 12 AM.'
+    ]))
+  },
+  showUpdates() {
+    renderer.dialogHeading.textContent = 'UPDATES';
+    renderer.dialogContent.appendChild(createFragment([
+      'Update 1: initial release'
     ]))
   }
 };
