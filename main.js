@@ -38,7 +38,8 @@ const gameState = {
   scolded: false,
   totalSAT: 0,
   absences: 0,
-  warned: false
+  warned: false,
+  retakeTests: 0
 };
 
 function updateHomework() {
@@ -139,6 +140,7 @@ async function beginSchool() {
     renderer.school.classList.remove('hidden');
     enableBtn(renderer.schoolContBtn);
   }
+  let testsToRetake = 0;
   if (gameState.sleeplessNights > 2 && gameState.tests) {
     renderer.schoolContent.appendChild(createFragment([
       span('', 'You didn\'t sleep enough and ended up sleeping during the test(s).'),
@@ -152,14 +154,10 @@ async function beginSchool() {
     await schoolContinue();
   } else if (gameState.absences === 3 && !gameState.warned) {
     renderer.schoolContent.appendChild(createFragment([
-      span('', 'The school pulled you out of class to warn you about your absence during SELF and how you can work on improving your attendance. They make it clear that five unexcused absences will lead to suspension.' + (gameState.tests ? ' You end up missing your test(s) from the talks.' : '.')),
+      span('', 'The school pulled you out of class to warn you about your absence during SELF and how you can work on improving your attendance. They make it clear that five unexcused absences will lead to suspension.' + (gameState.tests ? ' You end up missing your test(s) from the talks and you\'ll have to take them tomorrow.' : '.')),
       '\n'
     ]));
-    for (let i = 0; i < gameState.tests; i++) {
-      gameState.grade = (gameState.grade * gameState.testsTaken) / (gameState.testsTaken + 1);
-      gameState.testsTaken++;
-    }
-    renderer.grade.textContent = Math.round(gameState.grade * 100) / 100;
+    testsToRetake = gameState.tests;
     gameState.warned = true;
     await schoolContinue();
   } else if (gameState.absences >= 5) {
@@ -182,10 +180,11 @@ async function beginSchool() {
     renderer.sleepBtn.dataset.title = 'You aren\'t in school anymore!';
     return;
   } else {
-    for (let i = 0; i < gameState.tests; i++) {
+    for (let i = 0; i < gameState.tests - gameState.retakeTests; i++) {
       const threshold = Math.random() * 50 + 25;
       const score = Math.min(100, gameState.testReadiness + 100 - threshold);
       gameState.grade = (gameState.grade * gameState.testsTaken + score) / (gameState.testsTaken + 1);
+      renderer.grade.textContent = Math.round(gameState.grade * 100) / 100;
       gameState.testsTaken++;
       renderer.schoolContent.appendChild(createFragment([
         span('', `You receive ${Math.round(score * 100) / 100}% on a test.`),
@@ -251,7 +250,7 @@ async function beginSchool() {
   gameState.hwRate += 0.7;
   gameState.homeworks += Math.floor(gameState.hwRate);
   renderer.hwCount.textContent = gameState.homeworks;
-  gameState.tests = Math.floor(Math.random() * gameState.hwRate);
+  gameState.tests = Math.floor(Math.random() * gameState.hwRate) + testsToRetake;
   renderer.tests.textContent = gameState.tests;
   gameState.testReadiness = 0;
   renderer.testReadiness.textContent = gameState.testReadiness;
@@ -298,6 +297,26 @@ async function beginSchool() {
     ]));
     addHours(1);
   }
+  if (gameState.retakeTests) {
+    renderer.schoolContent.appendChild(createFragment([
+      span('', `You spend ${gameState.retakeTests} hour(s) after school to retake tests.`),
+      '\n'
+    ]));
+    addHours(gameState.retakeTests);
+    for (let i = 0; i < gameState.tests; i++) {
+      const threshold = Math.random() * 50 + 25;
+      const score = Math.min(100, gameState.testReadiness + 100 - threshold);
+      gameState.grade = (gameState.grade * gameState.testsTaken + score) / (gameState.testsTaken + 1);
+      renderer.grade.textContent = Math.round(gameState.grade * 100) / 100;
+      gameState.testsTaken++;
+      renderer.schoolContent.appendChild(createFragment([
+        span('', `You receive ${Math.round(score * 100) / 100}% on a test.`),
+        '\n'
+      ]));
+      await schoolContinue();
+    }
+  }
+  gameState.retakeTests = testsToRetake;
   if (renderer.friends && gameState.friends) {
     let resolve, promise = new Promise(res => resolve = res), opt1, opt2;
     renderer.schoolContBtn.classList.add('disabled');
