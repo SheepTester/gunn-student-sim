@@ -1,3 +1,19 @@
+// URL PARAMETERS
+// jennifer-li - activate Jennifer Li mode
+// bedtime - bedtime at 12 AM because you need 8 hours of sleep
+
+const params = {};
+if (window.location.search) {
+  window.location.search.slice(1).split('&').forEach(entry => {
+    const equalSignLoc = entry.indexOf('=');
+    if (~equalSignLoc) {
+      params[entry.slice(0, equalSignLoc)] = entry.slice(equalSignLoc + 1);
+    } else {
+      params[entry] = true;
+    }
+  });
+}
+
 const config = {
   MAX_SAT_STUDY: 50
 };
@@ -346,6 +362,16 @@ async function beginSchool() {
       addHours(3);
       await schoolContinue();
     }
+  }
+  if (params['jennifer-li']) {
+    const hours = Math.floor(Math.random() * 6 + 1);
+    renderer.schoolContent.appendChild(createFragment([
+      '\n',
+      span('jennifer-li', `You spend ${hours} hour(s) watching dog videos on Instagram. You regret doing so.`),
+      '\n'
+    ]));
+    addHours(hours);
+    await schoolContinue();
   }
   updateHomework();
   enableBtn(renderer.sleepBtn);
