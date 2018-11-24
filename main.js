@@ -33,16 +33,15 @@ function updateHomework() {
     if (gameState.tests) enableBtn(renderer.studyBtn);
     else disableBtn(renderer.studyBtn, 'You don\'t have a test tomorrow!');
   }
+  if (gameState.tests && gameState.testReadiness < 50) {
+    disableBtn(renderer.studySATBtn, 'You should at least be 50% prepared for your test!');
+  } else {
+    enableBtn(renderer.studySATBtn);
+  }
   if (gameState.homeworks === 0) {
     disableBtn(renderer.doHWBtn, 'No more homework!');
-    if (gameState.tests && gameState.testReadiness < 50) {
-      disableBtn(renderer.studySATBtn, 'You should at least be 50% prepared for your test!');
-    } else {
-      enableBtn(renderer.studySATBtn);
-    }
   } else {
     enableBtn(renderer.doHWBtn);
-    disableBtn(renderer.studySATBtn, 'Finish your homework first!');
   }
   if (gameState.scolded) {
     disableBtn(renderer.studySATBtn, 'You cannot concentrate because your parents are scolding you.');
