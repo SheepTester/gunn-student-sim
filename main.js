@@ -304,7 +304,7 @@ async function beginSchool() {
       '\n'
     ]));
     addHours(gameState.retakeTests);
-    for (let i = 0; i < gameState.tests; i++) {
+    for (let i = 0; i < gameState.retakeTests; i++) {
       const threshold = Math.random() * 50 + 25;
       const score = Math.min(100, tempReadiness + 100 - threshold);
       gameState.grade = (gameState.grade * gameState.testsTaken + score) / (gameState.testsTaken + 1);
