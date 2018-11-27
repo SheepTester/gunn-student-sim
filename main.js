@@ -14,6 +14,7 @@ if (window.location.search) {
   });
 }
 
+const SCORES_COOKIE_NAME = '[gunn-student-sim] scores';
 const config = {
   MAX_SAT_STUDY: 50
 };
@@ -87,9 +88,14 @@ function addHours(hours, atHome) {
   }
 }
 
-function calculateScore(win) {
+function calculateScore(manner) {
   const score = gameState.grade + gameState.friends * 20 + gameState.studySAT * 2 + gameState.accumulativeDay * 50;
-  return `${Math.round(score)}; survived ${gameState.accumulativeDay} day(s)`;
+  let scores = localStorage.getItem(SCORES_COOKIE_NAME);
+  if (scores) scores = JSON.parse(scores);
+  else scores = [];
+  scores.push([Math.round(score), new Date().toISOString(), manner]);
+  localStorage.setItem(SCORES_COOKIE_NAME, JSON.stringify(scores));
+  return span('', `Score: ${Math.round(score)}; survived ${gameState.accumulativeDay} day(s)`);
 }
 
 function schoolContinue() {
@@ -175,7 +181,7 @@ async function beginSchool() {
       '\n\n',
       span('the-end', 'GAME OVER'),
       '\n\n',
-      span('', 'Score: ' + calculateScore(false)),
+      calculateScore('suspended'),
       '\n\n',
       span('button', '[try again]', clicks.reload)
     ]));
@@ -410,7 +416,7 @@ async function beginSchool() {
         '\n\n',
         span('the-end', 'GAME OVER'),
         '\n\n',
-        span('', 'Score: ' + calculateScore(false)),
+        calculateScore('disowned'),
         '\n\n',
         span('button', '[try again]', clicks.reload)
       ]));
@@ -462,7 +468,11 @@ const clicks = {
     gameState.studySAT++;
     gameState.totalSAT++;
     if (gameState.studySAT >= 50) {
-      document.body.innerHTML = '';
+      while (document.body.children.length) {
+        if (document.body.lastChild !== this.floatingBar)
+          document.body.removeChild(document.body.lastChild);
+        else break;
+      }
       document.body.appendChild(createFragment([
         renderer.schoolContent = span(),
         renderer.schoolContBtn = span('button', '[ok]', clicks.schoolContinue)
@@ -476,7 +486,7 @@ const clicks = {
         document.body.appendChild(createFragment([
           span('the-end', 'YOU WIN!'),
           '\n\n',
-          span('', 'Score: ' + calculateScore(true)),
+          calculateScore('graduated'),
           '\n\n',
           span('button', '[play again]', clicks.reload)
         ]));
@@ -551,13 +561,35 @@ const clicks = {
     renderer.dialog.classList.add('hidden');
     renderer.dialogContent.innerHTML = '';
   },
+  showScores() {
+    renderer.dialogHeading.textContent = 'SCORES';
+    let scores = localStorage.getItem(SCORES_COOKIE_NAME);
+    if (scores) scores = JSON.parse(scores);
+    if (scores && scores.length) {
+      renderer.dialogContent.appendChild(createFragment([
+        span('score-heading', 'SCORE'),
+        ' | ',
+        span('score-heading', 'TIME'),
+        '                     | ',
+        span('score-heading', 'MANNER'),
+        '\n',
+        scores.sort((a, b) => b[0] - a[0]).map(([score, time, manner]) => score.toString().padStart(5) + ' | ' + time + ' | ' + manner).join('\n'),
+        '\n\nI probably won\'t add a global leaderboard.'
+      ]));
+    } else {
+      renderer.dialogContent.appendChild(createFragment([
+        'You haven\'t failed yet!'
+      ]));
+    }
+  },
   showInfo() {
     renderer.dialogHeading.textContent = 'INFO';
     renderer.dialogContent.appendChild(createFragment([
       'This game accurately portrays the life of a Gunn student. Students at Gunn must balance their social lives, academics, careers, and commitment to SELF, but to balance one would unbalance another.\n\n',
       'To win, you need to be able to take the SAT/ACT early so that you can graduate early. However, you can only do that in your free time since homework and test studying takes priority.\n\n',
+      'Anyone may (and should) make own version of this game, though please consider creditting the creator or link to this game somewhere.\n\n',
       span('button', '[more info]', './info.html')
-    ]))
+    ]));
   },
   showModes() {
     renderer.dialogHeading.textContent = 'GAME MODES';
@@ -568,15 +600,17 @@ const clicks = {
       span('button', '[jennifer li mode]', './?jennifer-li'),
       ' - Experience firsthand the detrimental effects of technological distractions by losing 1-6 hours every day to dog videos on Instagram, like fellow Gunn student Jennifer Li.\n',
       span('button', '[bedtime mode]', './?bedtime'),
-      ' - It is recommended to sleep at least eight hours a night; your parents care about your mental health, so they force you to sleep at 12 AM.'
-    ]))
+      ' - It is recommended to sleep at least eight hours a night; your parents care about your mental health, so they force you to sleep at 12 AM.\n',
+      '\nI probably won\'t add any more modes.'
+    ]));
   },
   showUpdates() {
     renderer.dialogHeading.textContent = 'UPDATES';
     renderer.dialogContent.appendChild(createFragment([
+      'Update 4: Added a score leaderboard (not global)\n\n',
       'Update 3: There\'s now a chance that a student will report you to the Administration for looking "depressed" if you don\'t sleep enough.\n\n',
       'Update 2: Number of days survived is shown with score, game is better at dealing with 15 friends\n\n',
       'Update 1: initial release'
-    ]))
+    ]));
   }
 };

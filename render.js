@@ -1,6 +1,6 @@
 function init() {
   document.body.appendChild(createFragment([
-    span('floating', [
+    this.floatingBar = span('floating', [
       renderer.dialog = span('dialog hidden', [
         renderer.dialogHeading = span('dialog-heading', ''),
         renderer.closeBtn = span('button close-button disabled', '[close]', clicks.closeDialog),
@@ -8,6 +8,8 @@ function init() {
         renderer.dialogContent = span()
       ]),
       '\n',
+      span('button info-button', '[scores]', openDialog(clicks.showScores)),
+      ' ',
       span('button info-button', '[info]', openDialog(clicks.showInfo)),
       ' ',
       span('button info-button', '[modes]', openDialog(clicks.showModes)),

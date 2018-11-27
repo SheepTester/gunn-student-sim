@@ -28,7 +28,9 @@ body {
 .dialog {
   display: block;
   text-align: left;
-  max-width: 300px;
+  max-width: 500px;
+  max-height: 50vh;
+  overflow: auto;
 }
 .hidden {
   display: none;
@@ -89,6 +91,10 @@ body {
 }
 .graduation-heading {
   color: #d8d996;
+  font-weight: bold;
+}
+.score-heading {
+  color: #8bc1e0;
   font-weight: bold;
 }
 .assembly-line-cc {
