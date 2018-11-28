@@ -1,7 +1,8 @@
+const [clicks] = (() => {
+
 // URL PARAMETERS
 // jennifer-li - activate Jennifer Li mode
 // bedtime     - bedtime at 12 AM because you need 8 hours of sleep
-
 const params = {};
 if (window.location.search) {
   window.location.search.slice(1).split('&').forEach(entry => {
@@ -44,6 +45,22 @@ const gameState = {
   avgSleepLength: null,
   reported: false
 };
+
+const stringifyScore = ((billy, bob, joe, died, hmmm) => { // Don't worry about me!
+  for (let i = 0; i < joe.length; i += 2) {
+    billy[joe[i + 1]] = joe[i];
+    bob[joe[i]] = joe[i + 1];
+  }
+  joe = t => {
+    const end = Math[died[6]](Math[died[5]]() * 6 + 2);
+    for (let i = end; i--;) {
+      const l = String.fromCharCode(Math[died[6]](Math[died[5]]() * 94 + 33));
+      if (!bob[l]) t += l;
+    }
+    return t;
+  };
+  return ziggles => ziggles[died[4]]()[died[1]](died[2])[died[0]](olam => billy[olam] + joe(died[2]))[died[3]](died[2]);
+})({}, {}, atob('QTE2MnozLjQsNUA2Xzc4OEc5ZzA' + String.fromCharCode(61)), JSON.parse(atob('WyJtYXAiLCJzcGxpdCIsIiIsImpvaW4iLCJ0b1N0cmluZyIsInJhbmRvbSIsImZsb29yIl0' + String.fromCharCode(61))), Math);
 
 function updateHomework() {
   renderer.hwCount.textContent = gameState.homeworks;
@@ -88,6 +105,8 @@ function addHours(hours, atHome) {
   }
 }
 
+// modified regex from  https://stackoverflow.com/questions/161738/what-is-the-best-regular-expression-to-check-if-a-string-is-a-valid-url#comment19948615_163684
+const urlRegex = /^(https?):\/\/[\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_|]$/;
 function calculateScore(manner) {
   const score = gameState.grade + gameState.friends * 20 + gameState.studySAT * 2 + gameState.accumulativeDay * 50;
   let scores = localStorage.getItem(SCORES_COOKIE_NAME);
@@ -95,7 +114,41 @@ function calculateScore(manner) {
   else scores = [];
   scores.push([Math.round(score), new Date().toISOString(), manner]);
   localStorage.setItem(SCORES_COOKIE_NAME, JSON.stringify(scores));
-  return span('', `Score: ${Math.round(score)}; survived ${gameState.accumulativeDay} day(s)`);
+  let urlInput, submitBtn, error;
+  return [
+    span('', `Score: ${Math.round(score)}; survived ${gameState.accumulativeDay} day(s)`),
+    '\n\n',
+    'You can submit your score to the global leaderboard; just identify yourself using a URL to your website or social media/Schoology profile. Make sure the URL contains the protocol (eg http or https). Your public IP address will be stored but won\'t be publicized.\n\nURL: ',
+    urlInput = input('', 'https://'),
+    ' ',
+    submitBtn = span('button', '[submit]', () => {
+      if (urlRegex.test(urlInput.value)) {
+        submitBtn.classList.add('disabled');
+        fetch('https://test-9d9aa.firebaseapp.com/newScore', {
+          headers: { 'Content-Type': 'application/json; charset=utf-8' },
+          method: 'POST',
+          body: JSON.stringify({
+            score: stringifyScore(Math.round(score)),
+            time: new Date().toISOString(),
+            url: urlInput.value,
+            manner: manner
+          })
+        }).then(res => {
+          if (res.status === 200) {
+            window.location = './leaderboard.html';
+          } else {
+            return Promise.reject();
+          }
+        }).catch(() => {
+          error.textContent = '\n\nThere was a problem submitting the score. You might have to try again.';
+          submitBtn.classList.remove('disabled');
+        });
+      } else {
+        error.textContent = '\n\nYour URL doesn\'t seem valid.';
+      }
+    }),
+    error = span('error')
+  ];
 }
 
 function schoolContinue() {
@@ -181,7 +234,7 @@ async function beginSchool() {
       '\n\n',
       span('the-end', 'GAME OVER'),
       '\n\n',
-      calculateScore('suspended'),
+      ...calculateScore('suspended'),
       '\n\n',
       span('button', '[try again]', clicks.reload)
     ]));
@@ -416,7 +469,7 @@ async function beginSchool() {
         '\n\n',
         span('the-end', 'GAME OVER'),
         '\n\n',
-        calculateScore('disowned'),
+        ...calculateScore('disowned'),
         '\n\n',
         span('button', '[try again]', clicks.reload)
       ]));
@@ -486,7 +539,7 @@ const clicks = {
         document.body.appendChild(createFragment([
           span('the-end', 'YOU WIN!'),
           '\n\n',
-          calculateScore('graduated'),
+          ...calculateScore('graduated'),
           '\n\n',
           span('button', '[play again]', clicks.reload)
         ]));
@@ -568,13 +621,21 @@ const clicks = {
     if (scores && scores.length) {
       renderer.dialogContent.appendChild(createFragment([
         span('score-heading', 'SCORE'),
-        ' | ',
+        span('divider', ' | '),
         span('score-heading', 'TIME'),
-        '                     | ',
+        span('divider', '                     | '),
         span('score-heading', 'MANNER'),
         '\n',
-        scores.sort((a, b) => b[0] - a[0]).map(([score, time, manner]) => score.toString().padStart(5) + ' | ' + time + ' | ' + manner).join('\n'),
-        '\n\nI probably won\'t add a global leaderboard.'
+        ...scores.sort((a, b) => b[0] - a[0]).map(([score, time, manner]) => span('', [
+          score.toString().padStart(5),
+          span('divider', ' | '),
+          time,
+          span('divider', ' | '),
+          manner,
+          '\n'
+        ])),
+        '\n',
+        span('button', '[global leaderboard]', './leaderboard.html')
       ]));
     } else {
       renderer.dialogContent.appendChild(createFragment([
@@ -607,6 +668,7 @@ const clicks = {
   showUpdates() {
     renderer.dialogHeading.textContent = 'UPDATES';
     renderer.dialogContent.appendChild(createFragment([
+      'Update 5: Added a global leaderboard; you will be given the opportunity to submit your score when the game ends.\n\n',
       'Update 4: Added a score leaderboard (not global)\n\n',
       'Update 3: There\'s now a chance that a student will report you to the Administration for looking "depressed" if you don\'t sleep enough.\n\n',
       'Update 2: Number of days survived is shown with score, game is better at dealing with 15 friends\n\n',
@@ -614,3 +676,7 @@ const clicks = {
     ]));
   }
 };
+
+return [clicks];
+
+})();

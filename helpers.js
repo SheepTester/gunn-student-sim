@@ -48,6 +48,14 @@ function span(classes = '', content = '', onclick = null, hoverText = '') {
   }
   return span;
 }
+function input(classes = '', label = '', value = '', hoverText = '') {
+  const input = document.createElement('input');
+  input.className = classes;
+  if (hoverText) input.dataset.title = hoverText;
+  if (label) input.placeholder = label;
+  if (value) input.value = value;
+  return input;
+}
 function disableBtn(btn, why) {
   btn.classList.add('disabled');
   btn.tabIndex = -1;

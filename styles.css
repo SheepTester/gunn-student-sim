@@ -11,6 +11,9 @@ body {
 .divider {
   color: rgba(255, 255, 255, 0.3);
 }
+a {
+  text-decoration: none;
+}
 .button {
   cursor: pointer;
   text-decoration: underline;
@@ -52,6 +55,20 @@ body {
 }
 .close-button {
   float: right;
+}
+input {
+  border: none;
+  background: none;
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 0;
+  font: inherit;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+}
+input:focus {
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.1);
+  cursor: auto;
 }
 
 .info-button {
@@ -112,4 +129,10 @@ body {
 .the-end, .assembly-line-gm {
   color: #d03c3c;
   font-weight: bold;
+}
+.error {
+  color: #e45f5f;
+}
+.divider {
+  color: rgba(255, 255, 255, 0.3);
 }
