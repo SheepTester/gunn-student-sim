@@ -129,6 +129,8 @@ function calculateScore(manner) {
           method: 'POST',
           body: JSON.stringify({
             score: stringifyScore(Math.round(score)),
+            friends: stringifyScore(Math.round(gameState.friends)),
+            accumulativeDay: stringifyScore(Math.round(gameState.accumulativeDay)),
             time: new Date().toISOString(),
             url: urlInput.value,
             manner: manner
