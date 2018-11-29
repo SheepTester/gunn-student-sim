@@ -36,6 +36,12 @@ async function init() {
       const typeValues = {disowned: 2, suspended: 1, graduated: 0}
       leaderboard.sort((a, b) => a.manner === b.manner ? b.score - a.score : typeValues[a.manner] - typeValues[b.manner]);
       break;
+    case 'days':
+      leaderboard.sort((a, b) => b.accumulativeDay - a.accumulativeDay);
+      break;
+    case 'friends':
+      leaderboard.sort((a, b) => b.friends - a.friends);
+      break;
   }
   let maxScoreWidth = 5;
   leaderboard.forEach(({score}) => {
@@ -48,12 +54,20 @@ async function init() {
     span('divider', ' | '),
     span('score-heading', 'TIME                    ', '?sort=chrono', 'Sort chronologically'),
     span('divider', ' | '),
+    span('score-heading', 'DAYS', '?sort=days', 'Sort by days'),
+    span('divider', ' | '),
+    span('score-heading', 'FRIENDS', '?sort=friends', 'Sort by friends'),
+    span('divider', ' | '),
     span('score-heading', 'MANNER', '?sort=type', 'Group by endings'),
-    ...leaderboard.map(({url, time, score, manner}) => span('', [
+    ...leaderboard.map(({url, time, score, manner, friends, accumulativeDay}) => span('', [
       '\n',
       score.toString().padStart(maxScoreWidth, ' '),
       span('divider', ' | '),
       span('button', time, url, url),
+      span('divider', ' | '),
+      accumulativeDay.toString().padStart(4, ' '),
+      span('divider', ' | '),
+      friends.toString().padStart(7, ' '),
       span('divider', ' | '),
       manner
     ]))

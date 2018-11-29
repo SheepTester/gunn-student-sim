@@ -641,7 +641,8 @@ const clicks = {
       ]));
     } else {
       renderer.dialogContent.appendChild(createFragment([
-        'You haven\'t failed yet!'
+        'No failures to show.\n\n',
+        span('button', '[global leaderboard]', './leaderboard.html')
       ]));
     }
   },
@@ -670,11 +671,12 @@ const clicks = {
   showUpdates() {
     renderer.dialogHeading.textContent = 'UPDATES';
     renderer.dialogContent.appendChild(createFragment([
-      'Update 5: Added a global leaderboard; you will be given the opportunity to submit your score when the game ends.\n\n',
-      'Update 4: Added a score leaderboard (not global)\n\n',
-      'Update 3: There\'s now a chance that a student will report you to the Administration for looking "depressed" if you don\'t sleep enough.\n\n',
-      'Update 2: Number of days survived is shown with score, game is better at dealing with 15 friends\n\n',
-      'Update 1: initial release'
+      'Update 1: initial release',
+      '\n\nUpdate 2: Number of days survived is shown with score, game is better at dealing with 15 friends',
+      '\n\nUpdate 3: There\'s now a chance that a student will report you to the Administration for looking "depressed" if you don\'t sleep enough.',
+      '\n\nUpdate 4: Added a score leaderboard (not global)',
+      '\n\nUpdate 5: Added a global leaderboard; you will be given the opportunity to submit your score when the game ends.',
+      '\n\nUpdate 6: Global leaderboard now shows friend count and days (because these statistics were also sent).'
     ]));
   }
 };
