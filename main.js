@@ -289,13 +289,13 @@ async function beginSchool() {
     ]), renderer.testStudyMarker);
   } else if (gameState.accumulativeDay === 2) {
     await assembly([
-      '--: Curlymango and Frenzy wave to the audience.',
-      'cc: Curlymango: Good morning! We are hard at work on a new fun extension to SELF for you guys to help you reduce stress.',
-      'tf: Frenzy: We plan to introduce this program tomorrow, so stay tuned!',
-      'cc: Curlymango: However, today we will give you a brief preview of what is to come!',
-      'tf: Frenzy: Friendships are extremely important, even more important that your schoolwork.',
-      'cc: Curlymango: That is why today, we are giving you guys a challenge: maintain at least THREE friendships! Most of you already have three friends, so this should not be hard.',
-      'tf: Frenzy: Do note that friendships require MAINTENANCE. However, we will be concerned if you do not satisfy this minimum.'
+      '--: ██████████ and ██████ wave to the audience.',
+      'cc: ██████████: Good morning! We are hard at work on a new fun extension to SELF for you guys to help you reduce stress.',
+      'tf: ██████: We plan to introduce this program tomorrow, so stay tuned!',
+      'cc: ██████████: However, today we will give you a brief preview of what is to come!',
+      'tf: ██████: Friendships are extremely important, even more important that your schoolwork.',
+      'cc: ██████████: That is why today, we are giving you guys a challenge: maintain at least THREE friendships! Most of you already have three friends, so this should not be hard.',
+      'tf: ██████: Do note that friendships require MAINTENANCE. However, we will be concerned if you do not satisfy this minimum.'
     ]);
     document.body.insertBefore(createFragment([
       ' ',
@@ -305,26 +305,26 @@ async function beginSchool() {
     ]), renderer.gradeMarker);
   } else if (gameState.accumulativeDay === 3) {
     await assembly([
-      '--: Curlymango and Frenzy wave to the audience.',
-      'cc: Curlymango: Good morning! Yesterday, we hinted at our destressing program that we have been working on for the last few months.',
-      'tf: Frenzy: Today is the day! We are proud to announce to you... after-school SELF!',
+      '--: ██████████ and ██████ wave to the audience.',
+      'cc: ██████████: Good morning! Yesterday, we hinted at our destressing program that we have been working on for the last few months.',
+      'tf: ██████: Today is the day! We are proud to announce to you... after-school SELF!',
       '--: The students do not react positively to this.',
-      'cc: Curlymango: Come on! You will enjoy this program for sure! This program is currently mandatory for sophomores only, but other grades are free to join in as well!',
-      'tf: Frenzy: This SELF session is only an hour long, and then you are free to leave!'
+      'cc: ██████████: Come on! You will enjoy this program for sure! This program is currently mandatory for sophomores only, but other grades are free to join in as well!',
+      'tf: ██████: This SELF session is only an hour long, and then you are free to leave!'
     ]);
     gameState.self = true;
   } else if (gameState.day === 4) {
     gameState.selfLength++;
     if (Math.random() < 0.5) {
       await assembly([
-        '--: Curlymango and Frenzy wave to the audience.',
-        `cc: Curlymango: Good morning! Since we\'ve noticed how much you guys loved the after-school SELF program, we\'re now making it ${gameState.selfLength} hours long!`
+        '--: ██████████ and ██████ wave to the audience.',
+        `cc: ██████████: Good morning! Since we\'ve noticed how much you guys loved the after-school SELF program, we\'re now making it ${gameState.selfLength} hours long!`
       ]);
     } else {
       gameState.friendExpectation++;
       await assembly([
-        '--: Curlymango and Frenzy wave to the audience.',
-        `tf: Frenzy: Good morning! With your newfound skills in relationship maintenance and friendship building, we\'re now raising our expectations! We now expect each of you to have at least ${gameState.friendExpectation} friends.`
+        '--: ██████████ and ██████ wave to the audience.',
+        `tf: ██████: Good morning! With your newfound skills in relationship maintenance and friendship building, we\'re now raising our expectations! We now expect each of you to have at least ${gameState.friendExpectation} friends.`
       ]);
       renderer.friends.dataset.title = `You need a minimum of ${gameState.friendExpectation} friends.`;
     }
@@ -676,7 +676,8 @@ const clicks = {
       '\n\nUpdate 3: There\'s now a chance that a student will report you to the Administration for looking "depressed" if you don\'t sleep enough.',
       '\n\nUpdate 4: Added a score leaderboard (not global)',
       '\n\nUpdate 5: Added a global leaderboard; you will be given the opportunity to submit your score when the game ends.',
-      '\n\nUpdate 6: Global leaderboard now shows friend count and days (because these statistics were also sent).'
+      '\n\nUpdate 6: Global leaderboard now shows friend count and days (because these statistics were also sent).',
+      '\n\nUpdate 7: Law compliance.'
     ]));
   }
 };
