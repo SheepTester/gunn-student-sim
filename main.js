@@ -1,8 +1,8 @@
 const [clicks] = (() => {
 
 // URL PARAMETERS
-// jennifer-li - activate Jennifer Li mode
-// bedtime     - bedtime at 12 AM because you need 8 hours of sleep
+// censored-name - activate Jennifer Li mode
+// bedtime       - bedtime at 12 AM because you need 8 hours of sleep
 const params = {};
 if (window.location.search) {
   window.location.search.slice(1).split('&').forEach(entry => {
@@ -14,6 +14,7 @@ if (window.location.search) {
     }
   });
 }
+if (params['jennifer-li']) params['censored-name'] = true;
 
 const SCORES_COOKIE_NAME = '[gunn-student-sim] scores';
 const config = {
@@ -493,7 +494,7 @@ async function beginSchool() {
       await schoolContinue();
     }
   }
-  if (params['jennifer-li'] && hoursLeft > 0) {
+  if (params['censored-name'] && hoursLeft > 0) {
     const hours = Math.min(Math.floor(Math.random() * 6 + 1), hoursLeft);
     renderer.schoolContent.appendChild(createFragment([
       span('jennifer-li', `You spend ${hours} hour(s) watching dog videos on Instagram. You regret doing so.`),
@@ -661,8 +662,8 @@ const clicks = {
       'There are a few game modes that make small changes to the game mechanics that make the game even harder. These were suggested by experienced Gunn students.\n',
       span('button', '[default mode]', './'),
       ' - Play the game as the creator intended it to be played.\n',
-      span('button', '[jennifer li mode]', './?jennifer-li'),
-      ' - Experience firsthand the detrimental effects of technological distractions by losing 1-6 hours every day to dog videos on Instagram, like fellow Gunn student Jennifer Li.\n',
+      span('button', '[████████ ██ mode]', './?censored-name'),
+      ' - Experience firsthand the detrimental effects of technological distractions by losing 1-6 hours every day to dog videos on Instagram, like fellow Gunn student ████████ ██.\n',
       span('button', '[bedtime mode]', './?bedtime'),
       ' - It is recommended to sleep at least eight hours a night; your parents care about your mental health, so they force you to sleep at 12 AM.\n',
       '\nI probably won\'t add any more modes.'
@@ -677,7 +678,8 @@ const clicks = {
       '\n\nUpdate 4: Added a score leaderboard (not global)',
       '\n\nUpdate 5: Added a global leaderboard; you will be given the opportunity to submit your score when the game ends.',
       '\n\nUpdate 6: Global leaderboard now shows friend count and days (because these statistics were also sent).',
-      '\n\nUpdate 7: Law compliance.'
+      '\n\nUpdate 7: Law compliance.',
+      '\n\nUpdate 8: Renamed a game mode.'
     ]));
   }
 };
