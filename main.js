@@ -652,7 +652,7 @@ const clicks = {
     renderer.dialogContent.appendChild(createFragment([
       'This game accurately portrays the life of a Gunn student. Students at Gunn must balance their social lives, academics, careers, and commitment to SELF, but to balance one would unbalance another.\n\n',
       'To win, you need to be able to take the SAT/ACT early so that you can graduate early. However, you can only do that in your free time since homework and test studying takes priority.\n\n',
-      'Anyone may (and should) make own version of this game, though please consider creditting the creator or link to this game somewhere.\n\n',
+      'Anyone may (and should) make own version of this game, though please consider crediting the creator or link to this game somewhere.\n\n',
       span('button', '[more info]', './info.html')
     ]));
   },
@@ -679,7 +679,8 @@ const clicks = {
       '\n\nUpdate 5: Added a global leaderboard; you will be given the opportunity to submit your score when the game ends.',
       '\n\nUpdate 6: Global leaderboard now shows friend count and days (because these statistics were also sent).',
       '\n\nUpdate 7: Law compliance.',
-      '\n\nUpdate 8: Renamed a game mode.'
+      '\n\nUpdate 8: Renamed a game mode.',
+      '\n\nUpdate 9: Added a background to the footer windows and fixed a typo.'
     ]));
   }
 };

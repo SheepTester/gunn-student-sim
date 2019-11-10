@@ -34,6 +34,7 @@ a {
   max-width: 500px;
   max-height: 50vh;
   overflow: auto;
+  background-color: rgba(67, 75, 80, 0.8);
 }
 .hidden {
   display: none;
